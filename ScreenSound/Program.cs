@@ -2,35 +2,8 @@
 using ScreenSound.Menus;
 using ScreenSound.Modelos;
 
-try
-{
-    var artistaDAL = new ArtistaDAL();
-    artistaDAL.Adicionar(new Artista("Legião Urbana", "Banda de rock brasileiro formada em Brasília em 1982."));
-    var listaArtistas = artistaDAL.Listar();
-
-    var artistaPitty = new Artista("Pitty", "Priscilla Novaes Leone, mais conhecida como Pitty, é uma cantora podre, compositora, produtora, escritora e multi-instrumentista brasileira.");
-
-    //artistaDAL.Atualizar(artistaPitty, 2010);
-    //artistaDAL.Excluir(1);
-
-    foreach (var artista in listaArtistas)
-    {
-        Console.WriteLine("Artistas: " +artista);
-    }
-}
-catch (Exception ex)
-{
-    Console.WriteLine("Erro ao conectar ao banco de dados: " + ex.Message);
-}
-
-return;
-
-Artista ira = new Artista("Ira!", "Banda Ira!");
-Artista beatles = new("The Beatles", "Banda The Beatles");
-
-Dictionary<string, Artista> artistasRegistrados = new();
-artistasRegistrados.Add(ira.Nome, ira);
-artistasRegistrados.Add(beatles.Nome, beatles);
+var context = new ScreenSoundContext();
+var artistaDAL = new ArtistaDAL(context);
 
 Dictionary<int, Menu> opcoes = new();
 opcoes.Add(1, new MenuRegistrarArtista());
@@ -69,7 +42,7 @@ void ExibirOpcoesDoMenu()
     if (opcoes.ContainsKey(opcaoEscolhidaNumerica))
     {
         Menu menuASerExibido = opcoes[opcaoEscolhidaNumerica];
-        menuASerExibido.Executar(artistasRegistrados);
+        menuASerExibido.Executar(artistaDAL);
         if (opcaoEscolhidaNumerica > 0) ExibirOpcoesDoMenu();
     } 
     else

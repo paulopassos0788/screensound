@@ -1,101 +1,58 @@
-﻿using Microsoft.Data.SqlClient;
-using ScreenSound.Modelos;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using ScreenSound.Modelos;
 
 namespace ScreenSound.Banco;
 
 internal class ArtistaDAL
 {
+    private readonly ScreenSoundContext context;
+
+    public ArtistaDAL(ScreenSoundContext context)
+    {
+        this.context = context;
+    }
+
     public IEnumerable<Artista> Listar()
     {
-        var lista = new List<Artista>();
-        using var connection = new Connection().ObterConexao();
-        connection.Open();
-
-        string sql = "SELECT * FROM Artistas";
-        SqlCommand command = new SqlCommand(sql, connection);
-        using SqlDataReader dataReader = command.ExecuteReader();
-
-        while (dataReader.Read())
-        {
-            string nomeArtista = Convert.ToString(dataReader["Nome"]);
-            string bioArtista = Convert.ToString(dataReader["Bio"]);
-            int idArtista = Convert.ToInt32(dataReader["Id"]);
-            Artista artista = new Artista(nomeArtista, bioArtista)
-            {
-                Id = idArtista
-            };
-            lista.Add(artista);
-        }
-        return lista;
+        return context.Artistas.ToList();
     }
 
     public void Adicionar(Artista artista)
     {
+        context.Artistas.Add(artista);
+        context.SaveChanges();
         var lista = new List<Artista>();
-        using var connection = new Connection().ObterConexao();
-        connection.Open();
-
-        string sql = "INSERT INTO Artistas (Nome, Bio, FotoPerfil) VALUES (@nome, @bio, @fotoPerfil)";
-        SqlCommand command = new SqlCommand(sql, connection);
-
-        command.Parameters.AddWithValue("@nome", artista.Nome);
-        command.Parameters.AddWithValue("@bio", artista.Bio);
-        command.Parameters.AddWithValue("@fotoPerfil", artista.FotoPerfil);
-
-        int retorno = command.ExecuteNonQuery();
-        if (retorno > 0)
-        {
-            Console.WriteLine("Artista adicionado com sucesso!");
-        }
-        else
-        {
-            Console.WriteLine("Erro ao adicionar artista.");
-        }
     }
 
     public void Atualizar(Artista artista, int id)
     {
-        using var connection = new Connection().ObterConexao();
-        connection.Open();
-        string sql = "UPDATE Artistas SET Nome = @nome, Bio = @bio WHERE Id = @id";
-        SqlCommand command = new SqlCommand(sql, connection);
+        var artistaExistente = context.Artistas.Find(id);
 
-        command.Parameters.AddWithValue("@nome", artista.Nome);
-        command.Parameters.AddWithValue("@bio", artista.Bio);
-        command.Parameters.AddWithValue("@id", id);
-
-        int retorno = command.ExecuteNonQuery();
-
-        if (retorno > 0)
+        if (artistaExistente == null)
         {
-            Console.WriteLine("Artista atualizado com sucesso!");
+            throw new ArgumentException($"Artista com ID {id} não encontrado.");
         }
-        else
-        {
-            Console.WriteLine("Erro ao atualizar artista.");
-        }
+
+        artistaExistente.Nome = artista.Nome;
+        artistaExistente.Bio = artista.Bio;
+
+        context.SaveChanges();
     }
 
-    public void Excluir(int id)
+    public async Task Excluir(int id)
     {
-        using var connection = new Connection().ObterConexao();
-        connection.Open();
-        string sql = "DELETE FROM Artistas WHERE Id = @id";
-        SqlCommand command = new SqlCommand(sql, connection);
-        command.Parameters.AddWithValue("@id", id);
-        int retorno = command.ExecuteNonQuery();
-        if (retorno > 0)
+        var artistaExistente = await context.Artistas.FindAsync(id);
+
+        if (artistaExistente == null)
         {
-            Console.WriteLine("Artista excluído com sucesso!");
+            throw new ArgumentException($"Artista com ID {id} não encontrado.");
         }
-        else
-        {
-            Console.WriteLine("Erro ao excluir artista.");
-        }
+
+        context.Artistas.Remove(artistaExistente);
+        await context.SaveChangesAsync();
+    }
+
+    public Artista? PesquisarArtistaPorNome(string nome)
+    {
+        return context.Artistas.FirstOrDefault(a => a.Nome.Equals(nome));
     }
 }
