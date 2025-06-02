@@ -20,15 +20,8 @@ internal class DAL<T> where T : class
         context.SaveChanges();
     }
 
-    public void Atualizar(T obj, int id)
+    public void Atualizar(T obj)
     {
-        var artistaExistente = context.Set<T>().Find(id);
-
-        if (artistaExistente == null)
-        {
-            throw new ArgumentException($"Artista com ID {id} não encontrado.");
-        }
-
         context.Set<T>().Update(obj);
         context.SaveChanges();
     }
