@@ -8,7 +8,7 @@ internal class ScreenSoundContext : DbContext
     public DbSet<Artista> Artistas { get; set; }
     public DbSet<Musica> Musicas { get; set; }
 
-    private static readonly string connectionString = "Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=screensound;Integrated Security=True;Connect Timeout=30;Encrypt=False;Trust Server Certificate=False;Application Intent=ReadWrite;Multi Subnet Failover=False";
+    private static readonly string connectionString = "Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=screensoundV0;Integrated Security=True;Connect Timeout=30;Encrypt=False;Trust Server Certificate=False;Application Intent=ReadWrite;Multi Subnet Failover=False";
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
